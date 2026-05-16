@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import {ApiResponse} from "./utils/ApiResponse.js"
 
 
 const app = express();
@@ -16,10 +17,7 @@ app.use(cookieParser());
 
 app.get("/api/health",(req,res)=>{
     return res.status(200).json(
-        {
-        "success": true,
-        "message": "Server working"
-        }
+        new ApiResponse(200, null, "Server is healthy and running")
     )
 })
 
