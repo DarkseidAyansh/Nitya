@@ -49,3 +49,33 @@ const syncHabits = async (req, res) => {
         )
     );
 };
+
+
+const getHabits = async (req, res) => {
+    const habits = await Habit.find({ user: req.user._id, isDeleted: false }).select("-__v");
+    
+    return res.status(200).json(
+        new ApiResponse(200, habits, "Habits retrieved successfully")
+    );
+};
+
+
+const deleteHabit = async (req, res) => {
+    const { syncId } = req.params;
+
+    const habit = await Habit.findOneAndUpdate(
+        { syncId, user: req.user._id },
+        { $set: { isDeleted: true, clientUpdatedAt: new Date() } },
+        { new: true }
+    );
+
+    if (!habit) {
+        throw new ApiError(404, "Habit not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, habit, "Habit deleted successfully")
+    );
+};
+
+export { syncHabits, getHabits, deleteHabit };
