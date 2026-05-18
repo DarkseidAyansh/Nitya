@@ -86,3 +86,67 @@ const getFeed = async (req, res) => {
     );
 };
 
+const toggleReaction = async (req, res) => {
+    const { postId } = req.params;
+    const userId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(postId)) {
+        throw new ApiError(400, "Invalid Post ID format");
+    }
+
+    const post = await Post.findById(postId);
+
+    if (!post) {
+        throw new ApiError(404, "Post not found");
+    }
+
+    const isLiked = post.likes.includes(userId);
+
+    const updateQuery = isLiked 
+        ? { $pull: { likes: userId } } 
+        : { $addToSet: { likes: userId } };
+
+    const updatedPost = await Post.findByIdAndUpdate(
+        postId,
+        updateQuery,
+        { new: true }
+    );
+
+    return res.status(200).json(
+        new ApiResponse(
+            200, 
+            { isLiked: !isLiked, likesCount: updatedPost.likes.length }, 
+            isLiked ? "Post unliked" : "Post liked"
+        )
+    );
+};
+
+const addComment = async (req, res) => {
+    const { postId } = req.params;
+    const { content } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(postId)) {
+        throw new ApiError(400, "Invalid Post ID format");
+    }
+
+    if (!content || content.trim() === "") {
+        throw new ApiError(400, "Comment content cannot be empty");
+    }
+
+    const postExists = await Post.exists({ _id: postId });
+    if (!postExists) {
+        throw new ApiError(404, "Post not found");
+    }
+
+    const comment = await Comment.create({
+        content,
+        post: postId,
+        user: req.user._id
+    });
+
+    return res.status(201).json(
+        new ApiResponse(201, comment, "Comment added successfully")
+    );
+};
+
+export { createPost, getFeed, toggleReaction, addComment };
