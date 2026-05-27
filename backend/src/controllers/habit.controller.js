@@ -19,6 +19,8 @@ const syncHabits = async (req, res) => {
                             frequency: clientHabit.frequency,
                             isDeleted: clientHabit.isDeleted,
                             clientUpdatedAt: clientHabit.clientUpdatedAt,
+                            lastCompletedDate: clientHabit.lastCompletedDate, 
+                            streakCount: clientHabit.streakCount,
                             user: userId
                         }
                     },
