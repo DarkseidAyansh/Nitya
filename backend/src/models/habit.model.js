@@ -35,6 +35,14 @@ const habitSchema = new Schema(
         clientUpdatedAt: {
             type: Date,
             required: true
+        },
+        lastCompletedDate: {
+            type: String,
+            default: null
+        },
+        streakCount: {
+            type: Number,
+            default: 0
         }
     },
     {
