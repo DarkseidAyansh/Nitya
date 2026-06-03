@@ -122,20 +122,11 @@ const toggleReaction = async (req, res) => {
 };
 
 const addComment = async (req, res) => {
-    const { postId } = req.params;
     const { content } = req.body;
-
-    if (!mongoose.Types.ObjectId.isValid(postId)) {
-        throw new ApiError(400, "Invalid Post ID format");
-    }
+    const { postId } = req.params;
 
     if (!content || content.trim() === "") {
-        throw new ApiError(400, "Comment content cannot be empty");
-    }
-
-    const postExists = await Post.exists({ _id: postId });
-    if (!postExists) {
-        throw new ApiError(404, "Post not found");
+        throw new ApiError(400, "Comment content is required");
     }
 
     const comment = await Comment.create({
@@ -144,9 +135,25 @@ const addComment = async (req, res) => {
         user: req.user._id
     });
 
+    await comment.populate("user", "_id name"); 
+
+    await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
+
     return res.status(201).json(
         new ApiResponse(201, comment, "Comment added successfully")
     );
 };
 
-export { createPost, getFeed, toggleReaction, addComment };
+const getComments = async (req, res) => {
+    const { postId } = req.params;
+    
+    const comments = await Comment.find({ post: postId })
+        .populate("user", "name")
+        .sort({ createdAt: -1 });
+
+    return res.status(200).json(
+        new ApiResponse(200, comments, "Comments retrieved")
+    );
+};
+
+export { createPost, getFeed, toggleReaction, addComment, getComments };
