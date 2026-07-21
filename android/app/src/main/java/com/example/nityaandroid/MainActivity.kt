@@ -127,6 +127,7 @@ class MainActivity : AppCompatActivity() {
         binding.topAppBar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_logout -> {
+                    showLogoutConfirmationDialog()
                     true
                 }
                 R.id.action_set_reminder -> {
@@ -167,6 +168,36 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun showLogoutConfirmationDialog() {
+        lifecycleScope.launch {
+            val hasOfflineData = authViewModel.checkUnsyncedData()
+
+            val message = if (hasOfflineData) {
+                "⚠️ You have offline changes that haven't been saved to the cloud. If you log out now, they will be permanently lost. Are you sure?"
+            } else {
+                "Are you sure you want to log out?"
+            }
+
+            MaterialAlertDialogBuilder(this@MainActivity)
+                .setTitle("Logout")
+                .setMessage(message)
+                .setPositiveButton(if (hasOfflineData) "Logout & Lose Data" else "Logout") { _, _ ->
+
+                    tokenManager.clearTokens()
+
+                    val syncPrefs = getSharedPreferences("sync_prefs", Context.MODE_PRIVATE)
+                    syncPrefs.edit().clear().apply()
+
+                    prefs.edit().clear().apply()
+
+                    authViewModel.logout()
+
+                    navigateToLoginSecurely()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+    }
 
     private fun observeLogoutState() {
         lifecycleScope.launch {
