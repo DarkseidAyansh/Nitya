@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- ✅ 1. Changed to 'always' and added a built-in Android alarm icon -->
+    <item
+        android:id="@+id/action_set_reminder"
+        android:title="Set Reminder"
+        android:icon="@android:drawable/ic_lock_idle_alarm"
+        app:iconTint="?attr/colorOnSurface"
+        app:showAsAction="always" />
+
+    <!-- 2. Logout stays exactly the same -->
+    <item
+            android:id="@+id/action_logout"
+        android:icon="@android:drawable/ic_lock_power_off"
+        app:iconTint="?attr/colorOnSurface"
+        android:title="Logout"
+        app:showAsAction="always" />
+
+</menu>
